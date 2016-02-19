@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+import shlex
 from subprocess import PIPE, Popen
 
 from coalib.parsing.StringProcessing import escape
@@ -16,14 +17,17 @@ def run_interactive_shell_command(command, **kwargs):
 
     :param command: The command to run on shell.
     :param kwargs:  Additional keyword arguments to pass to `subprocess.Popen`
-                    that is used to spawn the process (except `shell`,
-                    `stdout`, `stderr`, `stdin` and `universal_newlines`, a
-                    `TypeError` is raised then).
+                    that is used to spawn the process (except `stdout`,
+                    `stderr`, `stdin` and `universal_newlines`, a `TypeError`
+                    is raised then).
     :return:        A context manager yielding the process started from the
                     command.
     """
+    if isinstance(command, str):
+        command = shlex.split(command)
+    # TODO: docs: mention how strings and sequences are handled
+
     process = Popen(command,
-                    shell=True,
                     stdout=PIPE,
                     stderr=PIPE,
                     stdin=PIPE,
@@ -47,9 +51,9 @@ def run_shell_command(command, stdin=None, **kwargs):
     :param command: The command to run on shell.
     :param stdin:   Initial input to send to the process.
     :param kwargs:  Additional keyword arguments to pass to `subprocess.Popen`
-                    that is used to spawn the process (except `shell`,
-                    `stdout`, `stderr`, `stdin` and `universal_newlines`, a
-                    `TypeError` is raised then).
+                    that is used to spawn the process (except `stdout`,
+                    `stderr`, `stdin` and `universal_newlines`, a `TypeError`
+                    is raised then).
     :return:        A tuple with `(stdoutstring, stderrstring)`.
     """
     with run_interactive_shell_command(command, **kwargs) as p:

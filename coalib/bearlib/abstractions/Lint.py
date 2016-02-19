@@ -144,10 +144,19 @@ class Lint(Bear):
         return groups
 
     def _create_command(self, **kwargs):
-        command = self.executable + ' ' + self.arguments
+        # TODO: docs: Mention that self.arguments can be sequence or string
+        #             and describe handling. In this manner: what about the
+        #             lint guide? does it need adaption too?
         for key in ("filename", "config_file"):
             kwargs[key] = escape_path_argument(kwargs.get(key, "") or "")
-        return command.format(**kwargs)
+
+        if isinstance(self.arguments, str):
+            command = self.executable + ' ' + self.arguments
+            return command.format(**kwargs)
+        else:
+            command = [self.executable] + self.arguments
+            return command
+            # TODO FIND A PROPER WAY OF FORMATTING STUFF INSIDE LISTS!!!
 
     def __print_errors(self, errors):
         for line in filter(lambda error: bool(error.strip()), errors):
